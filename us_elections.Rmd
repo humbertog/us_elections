@@ -1,0 +1,325 @@
+---
+title: "The United States 2008, 2012 and 2016 presidential elections"
+subtitle: "An analysis from the county socioeconomic variables perspective"
+output: html_notebook
+
+author:
+- Humberto González
+- José Luis Licón
+- Rafael Prieto
+
+date: "`r format(Sys.time(), '%d %B %Y')`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(ggplot2)
+library(GGally)
+library(betareg)
+library(gridExtra)
+library(reshape2)
+
+#load("prepared_data.RData")
+load("prepared_data_1yr.RData")
+df_acs_votes$density <- df_acs_votes$pop_total / df_acs_votes$land_area
+mod_1 <- "perc_gop ~ (density + pop_perc_white_nh + 
+  eco_med_income +  eco_unemp_rate + eco_gini + 
+hc_perc_unins + edu_perc_college_and_more)*as.factor(year)"
+
+df_acs_votes$year[df_acs_votes$year == 2007] <- 2008
+df_acs_votes$year[df_acs_votes$year == 2011] <- 2012
+df_acs_votes$year[df_acs_votes$year == 2015] <- 2016
+df_acs_votes$year <- as.factor(df_acs_votes$year)
+df_acs_votes$edu_perc_college <- df_acs_votes$edu_perc_college_and_more
+
+#
+vars <- c("GEO.id2", "GEO.id", "GEO.display.label","year","density",
+          "pop_perc_white_nh", "eco_unemp_rate",
+          "eco_med_income", "eco_gini", "edu_perc_college_and_more", "hc_perc_unins", "perc_gop")
+
+df_acs_votes__ <- df_acs_votes[,vars]
+
+ave <- aggregate(df_acs_votes__[,-c(1:4)], by=list(df_acs_votes__$GEO.id2), FUN=mean, na.rm=TRUE)
+names(ave)[1] <- "GEO.id2"
+
+df_acs_votes__ <- merge(df_acs_votes__, ave, by=c("GEO.id2"), suffixes=c("","_m"))
+
+df_acs_votes__$chg_density <- df_acs_votes__$density - df_acs_votes__$density_m
+df_acs_votes__$chg_pop_perc_white <- df_acs_votes__$pop_perc_white_nh - df_acs_votes__$pop_perc_white_nh_m
+df_acs_votes__$chg_eco_med_income <-df_acs_votes__$eco_med_income - df_acs_votes__$eco_med_income_m
+df_acs_votes__$chg_eco_unemp_rate<-df_acs_votes__$eco_unemp_rate - df_acs_votes__$eco_unemp_rate_m
+df_acs_votes__$chg_eco_gini<-df_acs_votes__$eco_gini - df_acs_votes__$eco_gini_m
+df_acs_votes__$chg_hc_perc_unins<-df_acs_votes__$hc_perc_unins - df_acs_votes__$hc_perc_unins_m
+df_acs_votes__$chg_edu_perc_college<-df_acs_votes__$edu_perc_college_and_more - df_acs_votes__$edu_perc_college_and_more_m
+
+mod_2_d_3 <- "perc_gop ~ -1 + density_m + pop_perc_white_nh_m + eco_med_income_m +
+eco_unemp_rate_m + eco_gini_m + hc_perc_unins_m + edu_perc_college_and_more_m + 
+chg_density + chg_pop_perc_white + chg_eco_med_income + chg_eco_unemp_rate + chg_eco_gini + 
+chg_hc_perc_unins + chg_edu_perc_college"
+betar_2_d_3 <- betareg(as.formula(mod_2_d_3), data=df_acs_votes__, link="logit")
+```
+
+In this work we analyse how some socioeconomic characteristics relate to the results of the 2008, 2012 and 2016 US presidential elections. The socioeconomic variables that we take into account are associated to the income, the ethnicity, the level of education, and the health access of the population. Two regression models are fitted in order to study the electoral preference in the US counties. The first model allow us to study how the electoral preference of the population relates to (i) the level of the socioeconomic characteristics, and to (ii) the change of these characteristics in time. The second model allow us to see (iii) if the way in which these characteristics relate to the elections results changed from the 2008 to the 2016 elections. 
+
+The most relevant findings are that the level of the socioeconomic variables used in this work are correlated to the proportion of votes for the GOP. However, their variation, except for the population density and the median household income, doesn't seem to be important in explaining the election results. The weight that the socioeconomic variables have in explaining the election results, however, is different in the 2008 and 2016 elections for five of the seven variables. Moreover, the negative coefficients in 2008 get even smaller in 2016, while positive coefficients in 2008 get bigger in 2016. This can be consecuence of a population becoming more polarized. In particular, compared to the 2008 elections, in 2016 the population density and the education level weight more against the GOP, while the weights of the proportion of white people and uninsured population favours more the GOP.
+
+## Socioeconomic variables
+The unit that we use for the analysis is the county. For each county, we have measures of seven socioeconomic variables for the years 2007, 2011 and 2015. These are the years previous to the presidential elections in 2008 and 2012, won by Obama; and 2016, won by by Trump. Also, for each county, we have the results of the three presidential elections, which we will relate to the socioeconomic variables measured in the previous year. For simplicity of exposition, we only reffer to the years 2008, 2012 and 2016 in this work, with the understanding that the socioeconomic variables were measured in the years 2007, 2011 and 2015. The variables that we consider in this work are listed below.
+
+Variable      | Range   | Description
+------------- | ------- | ---------------------------------------------
+density             | $\mathbb{R}$    | Population density in the county
+perc_gop            | [0,1]  | Percentage of the population that voted for the republican party (GOP) 
+pop_perc_white_nh   | [0,1]    | Percentage of the population that belongs to the white (non hispanic) ethnic group
+eco_unemp_rate      | [0,1]    | Unemployment rate
+eco_med_income      | $\mathbb{R}$   | Median household income
+eco_gini            | [0,1]    | Gini index. A measure of income inequality, where 0 is no inequality and 1 is extreme inequality
+edu_perc_college_and_more | [0,1]| Percentage of the population of 25 years old and over that has a college degree or higher
+hc_perc_unins           | [0,1]| Percentage of the population that has not a health insurance
+
+
+The data of socioeconomical variables used in this work come from the [United Stated Census Bureu American Community Survey (ACS)](https://www.census.gov/programs-surveys/acs/) for the years 2007, 2011 and 2015. The 1-year estimates of the ACS are used[^1]. The number of counties in the data is 788, 811 and 819, respectively for for the three years, which correspond to the ones with more than 65,000 inhabitants[^2]. The county level election results come from the [Github page of tonmcg](https://github.com/tonmcg/County_Level_Election_Results_12-16).
+
+### Density
+, and that the proportion of votes for the GOP in this counties is less than 25\% in the three years. Throughout this analysis we will observe that the counties with high population density are atypical. 
+
+```{r densityplot, echo=FALSE, warning=FALSE}
+xlabl <- "density"
+g1<-ggplot(df_acs_votes, aes(density, log(perc_gop/(1- perc_gop)), colour=as.factor(year))) + 
+  geom_point(aes(size=pop_total/1000), alpha=0.5, shape=1) +
+  geom_smooth(se=TRUE, method="lm") + #theme(legend.position="bottom") + 
+  labs(x=xlabl, y="log-odds GOP", 
+       colour="year", size="pop/1000"
+       ) 
+g2<-ggplot(df_acs_votes, aes(as.factor(year), density, colour=as.factor(year))) + 
+  geom_boxplot() +
+  labs(x="year", y=xlabl, 
+       colour="year        "
+  ) +  coord_flip() +
+  theme(#legend.position="none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+#grid.arrange(g1,g2,widths=c(2.5,1), nrow=1,ncol=2)
+grid.arrange(g2,g1, heights=c(1,4), nrow=2,ncol=1)
+
+```
+
+### Ethnicity
+We compare the percentage of white (non hispanic) people vs the proportion of votes received by the GOP in the three years. In the three elections we observe a general trend: the more white the population is in a county, the more proportion of votes that the GOP received. For counties with less than 50\% of white population the trends are similar for the three years. For counties where more than 50\% of the population is white, the percentage of votes for the GOP is greater in 2012 and 2016 than in 2008. But, interestingly, in the 2016 elections the trend changes in counties with highly predominant white population ($>85\%$): they voted more, proportionally, for the GOP than in previous years. Another interesting fact is that, in general, the counties with high population densities are more diverse.
+
+```{r raceplot, echo=FALSE, results = FALSE, warning=FALSE}
+g1<-ggplot(df_acs_votes, aes(pop_perc_white_nh, log(perc_gop/(1- perc_gop)), colour=as.factor(year))) + 
+  geom_point(aes(size=pop_total/1000), alpha=0.5, shape=1) +
+  geom_smooth(se=TRUE, method="lm") + #theme(legend.position="bottom") + 
+  labs(x="% of white population", y="log-odds GOP", 
+       colour="year", size="pop/1000"
+       )
+
+g2<-ggplot(df_acs_votes, aes(as.factor(year), pop_perc_white_nh, colour=as.factor(year))) + 
+  geom_boxplot() +
+  labs(x="year", y="% of white population", 
+       colour="year       "
+  ) + ylim(c(0,1)) + coord_flip() +
+  theme(#legend.position="none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+#grid.arrange(g1,g2,widths=c(2.5,1), nrow=1,ncol=2)
+grid.arrange(g2,g1, heights=c(1,4), nrow=2,ncol=1)
+
+```
+
+### Economics
+
+#### Unemployment rate
+As a consequence of the economic crisis of 2008, we can see that the unemployment rate rose considerably from 2008 to 2012 in practically all counties. Thereafter, from 2012 to 2016, we observe a recovery in the employment, to reach the pre-crisis levels of 2008. Regarding the elections, we observe that unemployment is negatively correlated to the proportion of votes for the GOP, i.e., counties with higher rates of unemployment vote, proportionally, less for the GOP. The trend for the 2012 elections stands out from the rest, which is likely to be attributable to the change in the unemployment rate, rather than to a change in the voting proportion: the trend curve of 2016 is a translated version of the trends observed in 2008 and 2012. 
+
+```{r unemplot, echo=FALSE, warning=FALSE}
+xlabl <- "unemployment rate"
+g1<-ggplot(df_acs_votes, aes(eco_unemp_rate, log(perc_gop/(1- perc_gop)), colour=as.factor(year))) + 
+  geom_point(aes(size=pop_total/1000), alpha=0.5, shape=1) +
+  geom_smooth(se=TRUE, method="lm") + #theme(legend.position="bottom") + 
+  labs(x=xlabl, y="log-odds GOP", 
+       colour="year", size="pop/1000"
+       ) 
+g2<-ggplot(df_acs_votes, aes(as.factor(year), eco_unemp_rate, colour=as.factor(year))) + 
+  geom_boxplot() +
+  labs(x="year", y=xlabl, 
+       colour="year        "
+  ) +  coord_flip() +
+  theme(#legend.position="none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+#grid.arrange(g1,g2,widths=c(2.5,1), nrow=1,ncol=2)
+grid.arrange(g2,g1, heights=c(1,4), nrow=2,ncol=1)
+
+```
+
+#### Household income
+First, we note that the household income was also affected by the 2008 economic crisis. However, contrary to the unemployment rate that has recovered from 2012 to 2016, it hasn't yet reached the levels of 2008. 
+
+Regarding, the elections results, for the three years, we observe that counties with higher income vote less (proportionally) for the GOP. However, comparing the trends of the three elections, we can observe that in 2016 the lower income counties voted more for the GOP, while the counties with higher income voted less for this party. This means that in the last elections the results are more polarized across the income levels of the counties. Also, we see that the income of highly dense populated counties is distributed along all levels of income.
+
+```{r incomeplot, echo=FALSE, warning=FALSE}
+xlabl <- "household income"
+g1<-ggplot(df_acs_votes, aes(eco_med_income, log(perc_gop/(1- perc_gop)), colour=as.factor(year))) + 
+  geom_point(aes(size=pop_total/1000), alpha=0.5, shape=1) +
+  geom_smooth(se=TRUE, method="lm") + #theme(legend.position="bottom") + 
+  labs(x=xlabl, y="log-odds GOP", 
+       colour="year", size="pop/1000"
+       ) 
+g2<-ggplot(df_acs_votes, aes(as.factor(year), eco_med_income, colour=as.factor(year))) + 
+  geom_boxplot() +
+  labs(x="year", y=xlabl, 
+       colour="year        "
+  ) +  coord_flip() +
+  theme(#legend.position="none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+#grid.arrange(g1,g2,widths=c(2.5,1), nrow=1,ncol=2)
+grid.arrange(g2,g1, heights=c(1,4), nrow=2,ncol=1)
+
+```
+
+#### Gini index
+The Gini index, which measures the inequality in the income distribution, has worsened since 2008. The correlation of the Gini index with the proportion of votes for the GOP is negative, which means that counties which are more unequal in their income distribution vote proportionally less for the GOP. This may be due to the fact that the more dense populated counties show a large Gini index[^3], and low proportion of votes for the GOP. The shape of the trend line is similar across the three years analyzed here.
+
+```{r giniplot, echo=FALSE, warning=FALSE}
+xlabl <- "Gini index"
+g1<-ggplot(df_acs_votes, aes(eco_gini, log(perc_gop/(1- perc_gop)), colour=as.factor(year))) + 
+  geom_point(aes(size=pop_total/1000), alpha=0.5, shape=1) +
+  geom_smooth(se=TRUE, method="lm") + #theme(legend.position="bottom") + 
+  labs(x=xlabl, y="log-odds GOP", 
+       colour="year", size="pop/1000"
+       ) 
+g2<-ggplot(df_acs_votes, aes(as.factor(year), eco_gini, colour=as.factor(year))) + 
+  geom_boxplot() +
+  labs(x="year", y=xlabl, 
+       colour="year        "
+  ) +  coord_flip() +
+  theme(#legend.position="none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+#grid.arrange(g1,g2,widths=c(2.5,1), nrow=1,ncol=2)
+grid.arrange(g2,g1, heights=c(1,4), nrow=2,ncol=1)
+
+```
+
+### Education
+Here, we compare the percentage of the population of more than 25 years old who has a college degree or superior, with the percentage of votes for the GOP. For the years 2012 and 2016, the slope is clearly negative, i.e., the higher the level of educated people in a county, the less they have supported the candidates of the GOP. Furthermore, since the year 2008, the slope of the trend line is getting more pronounced, which means that the voting results are more polarized across the level of education. It is interesting to see that for the year 2008 there are counties with very high education level, but that no counties with such education levels are observed in 2012 and 2016. Since people cannot be made uneducated, this behaviour, at least in the short term, can only be explained by migration: either emigration of highly educated people or immigration of less educated people, or both.
+
+```{r eduplot, echo=FALSE, warning=FALSE}
+xlabl <- "% of population with college degree or more"
+g1<-ggplot(df_acs_votes, aes(edu_perc_college_and_more, log(perc_gop/(1- perc_gop)), colour=as.factor(year))) + 
+  geom_point(aes(size=pop_total/1000), alpha=0.5, shape=1) +
+  geom_smooth(se=TRUE, method="lm") + #theme(legend.position="bottom") + 
+  labs(x=xlabl, y="log-odds GOP", 
+       colour="year", size="pop/1000"
+       ) 
+g2<-ggplot(df_acs_votes, aes(as.factor(year), edu_perc_college_and_more, colour=as.factor(year))) + 
+  geom_boxplot() +
+  labs(x="year", y=xlabl, 
+       colour="year        "
+  ) +  coord_flip() +
+  theme(#legend.position="none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+#grid.arrange(g1,g2,widths=c(2.5,1), nrow=1,ncol=2)
+grid.arrange(g2,g1, heights=c(1,4), nrow=2,ncol=1)
+```
+
+### Healthcare coverage
+We observe a clear decrease in the proportion of uninsured citizens since 2012. Moreover, the decrease has taken place in practically all the counties. Regarding the election results, for the three years we note similar trend curves. However, the trend curve for the 2016 elections appears to be a translated version of the others. From this last remark, we can conclude that the decrease in the uninsured population seems to have had no effect in the proportion of votes that the GOP obtained in 2016.
+
+```{r healthplot, echo=FALSE, warning=FALSE}
+xlabl <- "% of uninsured population"
+g1<-ggplot(df_acs_votes, aes(hc_perc_unins, log(perc_gop/(1- perc_gop)), colour=as.factor(year))) + 
+  geom_point(aes(size=pop_total/1000), alpha=0.5, shape=1) +
+  geom_smooth(se=TRUE, method="lm") + #theme(legend.position="bottom") + 
+  labs(x=xlabl, y="log-odds GOP", 
+       colour="year", size="pop/1000"
+       ) 
+g2<-ggplot(df_acs_votes, aes(as.factor(year), hc_perc_unins, colour=as.factor(year))) + 
+  geom_boxplot() +
+  labs(x="year", y=xlabl, 
+       colour="year        "
+  ) +  coord_flip() +
+  theme(#legend.position="none",
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+#grid.arrange(g1,g2,widths=c(2.5,1), nrow=1,ncol=2)
+grid.arrange(g2,g1, heights=c(1,4), nrow=2,ncol=1)
+```
+
+## Regression analysis
+### Model 1: Election results explained by the level and change in population characteristics
+We propose a first regression model to try to capture how the (i) level of the socioeconomic variables, i.e., their per county average, and (ii) the deviations from this average relate to the elections results. The model that we propose is of the form
+$$
+logit(E[y_{it}]) = x_{i.}^T\alpha + (x_{it} - x_{i.})^T\beta,
+$$
+where $y_{it}$ is the proportion of votes for the GOP in the county $i$ for the year $t$,   $E[y_{it}]$ is its expected value; $x_{it}$ is the vector of independent variables measured for the county $i$ at time $t$; $x_{i.}$ is the vector of means in time of the independent variables for county $i$. The estimated coefficients are $\alpha$ and $\beta$.
+
+The coefficients $\alpha$ relate the proportion of votes that the GOP received with the county mean level of the socioeconomic variables. The coefficients $\beta$ relate the proportion of votes that the GOP received in the last three elections with the deviation that these variables have from their mean value across time. Since our dependent variable, the proportion of votes for the GOP, lies in the $(0,1)$ interval, we propose to model $y_{it}$ as a beta distributed random variable[^4]. The results of this model are shown below. 
+
+
+In the results we see that all the estimated coefficients $\alpha$ are statistically significant. We observe a positive sign in the coefficients for the percentage of white population, the median household income, and the percentage of uninsured population. This can be interpreted as: the higher these variables are in a county, the higher the proportion of votes for the GOP. The converse is true for the variables with coefficients of negative sign: the population density, the unemployment rate, the gini index and the percentage of population with college or more. 
+
+The coefficients $\beta$, except those for the change in the population density and the change in the median income, are not statistically significant. Both the change in population density and change in median household income have negative signs, which means that when the change is positive, the GOP receives proportionally less votes. The estimated coefficients for the change in density and the change in household income are larger (in magnitude) than the coefficients for the level of these variables and, furthermore, the signs for the income coefficients are opposite.
+
+  
+### Model 2: Change in the weight that population characteristics have in explaining the election results
+In the previous analysis we noted that, in some cases, even when the explanatory variables didn't seem to change in time, the voting trends did. To further investigate this behaviour a second regression model is proposed in order to to study if the way in which the socioeconomic variables relate to the election results has changed over time. The proposed model has the form
+$$
+logit(E[y_{it}]) = x_{it}^T\beta_{t},
+$$
+where $y_{it}$ is the proportion of votes for the GOP in the county $i$ for the year $t$,   $E[y_{it}]$ is its expected value, $x_{it}$ the vector of independent variables measured for the county $i$ at time $t$, and $\beta_{t}$ the vector of coefficients for year $t$.  
+
+This model allow us to test the hypothesis $\beta_{t} == \beta_{s}$. If the hypothesis is rejected, then we can state that the explanatory variable relates to the election results in different manner for the elections in the years $t$ and $s$. As in our first model, we assume $y_{it}$ to be a beta distributed random variable. The results of this model are shown below[^5].
+
+
+
+The coefficients $\beta_{2008}$ and $\beta_{2016}$ are statistically different (significance level of 0.01\%) for the population density, the percentage of white people, the mean household income, the percentage of uninsured people, and the percentage of the population with college degree or more. Compared to 2008, in the 2016 elections the coefficients of the population density and the percentage of population with college degree are smaller, which means that they weighted more against the GOP in 2016. The rest of the variables weighted more in favour of the GOP. It is interesting to note that, compared to 2008, the coefficients are bigger in magnitude in 2016. This can be interpreted as an increasingly polarized population.
+
+## Conclusions
+In this work two regression models were used to explain the election results via their relation with socioeconomic variables. The first model tries to capture how the level of the socioeconomic variables, i.e., their per county average, and the deviations from this average relate to the elections results. The second model is proposed to study if the way in which the socioeconomic variables relate to the election results has changed over time. We found that the level of the socioeconomic variables used in this work are correlated to the proportion of votes for the GOP. However, their variation, except for the population density and the median household income, doesn't seem to be important in explaining the election results. The weight that the socioeconomic variables have in explaining the election results, however, is different in the 2008 and 2016 elections for five of the seven variables. Moreover, the negative coefficients in the 2008 elections get even smaller in 2016, while positive coefficients in 2008 get bigger in 2016. This can be consecuence of an increasingly polarized population. In particular, compared to the 2008 elections, in 2016 the population density and the education level weight more against the GOP, while the weights of the proportion of white people and uninsured population favour more the GOP. Remembering that the reduction of the uninsured people is consecuence of the Patient Protection and Affordable Care Act (Obamacare), this last result is counter-intuitive. 
+
+Contrary to intuition, the higher the unemployment rate in a county, the less they vote proportionally for the GOP. In addition, changes in the unemployment rate doesn't seem to be related with the election results, nor the weight that this variable has in explaining the election results has changed from 2008 to 2016. 
+
+Finally, the change in the weight that the variables have in explaining the proportion of votes for the GOP (model 2), means that counties with similar characteristics across time voted in a different manner in 2016, compared to the 2008 elections. This implies that there are other variables explaining the election results. Some of these unobserved variables can be attributed to demographic phenomena, such as internal migration; the effect of the candidates in the elections; or to individual variables, such as perceptions. These later individual variables being difficult, if not impossible, to measure. 
+
+## Appendix
+### Regression Model 1
+```{r, echo=FALSE, warning=FALSE}
+summary(betar_2_d_3)
+```
+
+### Regression Model 2 
+```{r, echo=FALSE, warning=FALSE}
+betar_1 <- betareg(perc_gop ~  (density + pop_perc_white_nh + 
+  eco_med_income +  eco_unemp_rate + eco_gini + 
+hc_perc_unins + edu_perc_college)*year, data=df_acs_votes, link="logit")
+
+summary(betar_1)
+```
+
+[^1]: The reason why the 1-year estimates are used in this work is that we are interested in the currency of the data.
+[^2]: https://www.census.gov/programs-surveys/acs/guidance/estimates.html
+[^3]: Counties with high population density are urban areas. As such, they offer a great variaty of economic activities, which go from Wallmart cashiers to Wallstreet bankers.
+[^4]: See https://cran.r-project.org/web/packages/betareg/vignettes/betareg.pdf
+[^5]: In this results, the $\beta_{2008}=\text{variable_name}$'s and $\beta_{2016}=\text{variable_name} + \text{variable_name:year2016}$.

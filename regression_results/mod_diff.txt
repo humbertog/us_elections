@@ -1,0 +1,37 @@
+mod_2_d <- "I(perc_gop- perc_gop_m) ~ -1 + I(density - density_m) + 
+I(pop_perc_white_nh - pop_perc_white_nh_m) + I(eco_med_income - eco_med_income_m) +
+I(eco_unemp_rate - eco_unemp_rate_m) + I(eco_gini - eco_gini_m) +
+I(hc_perc_unins - hc_perc_unins_m) + 
+I(edu_perc_college_and_more - edu_perc_college_and_more_m) "
+
+Call:
+lm(formula = as.formula(mod_2_d), data = df_acs_votes__)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.24872 -0.01568  0.00018  0.01527  0.16294 
+
+Coefficients:
+                                                             Estimate Std. Error t value Pr(>|t|)
+I(density - density_m)                                     -1.358e-04  1.968e-05  -6.899 6.81e-12
+I(pop_perc_white_nh - pop_perc_white_nh_m)                  1.054e-02  5.057e-02   0.208  0.83488
+I(eco_med_income - eco_med_income_m)                       -1.923e-06  2.714e-07  -7.087 1.83e-12
+I(eco_unemp_rate - eco_unemp_rate_m)                        3.583e-02  6.122e-02   0.585  0.55839
+I(eco_gini - eco_gini_m)                                    1.231e-01  4.426e-02   2.782  0.00544
+I(hc_perc_unins - hc_perc_unins_m)                         -1.008e-01  2.397e-02  -4.204 2.72e-05
+I(edu_perc_college_and_more - edu_perc_college_and_more_m)  2.236e-02  2.457e-02   0.910  0.36301
+                                                              
+I(density - density_m)                                     ***
+I(pop_perc_white_nh - pop_perc_white_nh_m)                    
+I(eco_med_income - eco_med_income_m)                       ***
+I(eco_unemp_rate - eco_unemp_rate_m)                          
+I(eco_gini - eco_gini_m)                                   ** 
+I(hc_perc_unins - hc_perc_unins_m)                         ***
+I(edu_perc_college_and_more - edu_perc_college_and_more_m)    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.02817 on 2222 degrees of freedom
+  (189 observations deleted due to missingness)
+Multiple R-squared:  0.08039,	Adjusted R-squared:  0.07749 
+F-statistic: 27.75 on 7 and 2222 DF,  p-value: < 2.2e-16

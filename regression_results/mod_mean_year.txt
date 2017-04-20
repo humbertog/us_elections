@@ -1,0 +1,48 @@
+mod_1 <- "perc_gop ~   ( density + pop_perc_white_nh + 
+eco_med_income +  eco_unemp_rate + eco_gini + 
+hc_perc_unins + edu_perc_college_and_more)*as.factor(year)"
+
+Call:
+betareg(formula = as.formula(mod_1), data = df_acs_votes, link = "logit")
+
+Standardized weighted residuals 2:
+    Min      1Q  Median      3Q     Max 
+-6.0759 -0.6204  0.0293  0.6345  4.0200 
+
+Coefficients (mean model with logit link):
+                                                Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                                    2.534e-01  3.211e-01   0.789 0.429999    
+density                                       -1.002e-04  1.923e-05  -5.210 1.89e-07 ***
+pop_perc_white_nh                              1.387e+00  1.159e-01  11.975  < 2e-16 ***
+eco_med_income                                 1.171e-06  1.547e-06   0.757 0.448931    
+eco_unemp_rate                                -6.692e+00  1.485e+00  -4.506 6.61e-06 ***
+eco_gini                                      -3.140e+00  5.104e-01  -6.152 7.64e-10 ***
+hc_perc_unins                                  4.931e+00  3.700e-01  13.327  < 2e-16 ***
+edu_perc_college_and_more                     -8.164e-01  1.777e-01  -4.594 4.36e-06 ***
+as.factor(year)2011                           -1.249e+00  4.591e-01  -2.721 0.006504 ** 
+as.factor(year)2015                            1.596e-01  4.465e-01   0.357 0.720751    
+density:as.factor(year)2011                   -7.287e-06  2.765e-05  -0.263 0.792170    
+density:as.factor(year)2015                   -6.094e-05  2.832e-05  -2.152 0.031387 *  
+pop_perc_white_nh:as.factor(year)2011          5.976e-01  1.636e-01   3.653 0.000259 ***
+pop_perc_white_nh:as.factor(year)2015          7.177e-01  1.629e-01   4.404 1.06e-05 ***
+eco_med_income:as.factor(year)2011             9.796e-06  2.271e-06   4.314 1.60e-05 ***
+eco_med_income:as.factor(year)2015             4.587e-06  2.167e-06   2.117 0.034285 *  
+eco_unemp_rate:as.factor(year)2011             1.629e+00  1.753e+00   0.929 0.352760    
+eco_unemp_rate:as.factor(year)2015             2.853e+00  2.077e+00   1.373 0.169599    
+eco_gini:as.factor(year)2011                   5.250e-01  7.180e-01   0.731 0.464700    
+eco_gini:as.factor(year)2015                   9.770e-01  7.143e-01   1.368 0.171368    
+hc_perc_unins:as.factor(year)2011              2.504e+00  5.544e-01   4.517 6.27e-06 ***
+hc_perc_unins:as.factor(year)2015              1.633e+00  6.191e-01   2.637 0.008358 ** 
+edu_perc_college_and_more:as.factor(year)2011 -2.822e-01  2.762e-01  -1.022 0.306939    
+edu_perc_college_and_more:as.factor(year)2015 -1.764e+00  2.843e-01  -6.205 5.46e-10 ***
+
+Phi coefficients (precision model with identity link):
+      Estimate Std. Error z value Pr(>|z|)    
+(phi)   25.230      0.742      34   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Type of estimator: ML (maximum likelihood)
+Log-likelihood:  2083 on 25 Df
+Pseudo R-squared: 0.5412
+Number of iterations: 33 (BFGS) + 4 (Fisher scoring) 

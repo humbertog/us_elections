@@ -1,0 +1,47 @@
+mod_2_d_3 <- "perc_gop ~ 1 + density_m + pop_perc_white_nh_m + eco_med_income_m +
+eco_unemp_rate_m + eco_gini_m + hc_perc_unins_m + edu_perc_college_and_more_m + 
+I(density - density_m) + 
+I(pop_perc_white_nh - pop_perc_white_nh_m) + I(eco_med_income - eco_med_income_m) +
+I(eco_unemp_rate - eco_unemp_rate_m) + I(eco_gini - eco_gini_m) +
+I(hc_perc_unins - hc_perc_unins_m) + 
+I(edu_perc_college_and_more - edu_perc_college_and_more_m)"
+
+
+
+Call:
+betareg(formula = as.formula(mod_2_d_3), data = df_acs_votes__, link = "logit")
+
+Standardized weighted residuals 2:
+    Min      1Q  Median      3Q     Max 
+-6.6387 -0.6215  0.0541  0.6698  4.3784 
+
+Coefficients (mean model with logit link):
+                                                             Estimate Std. Error z value Pr(>|z|)
+(Intercept)                                                 7.686e-02  2.054e-01   0.374  0.70830
+density_m                                                  -9.877e-05  1.120e-05  -8.818  < 2e-16  ***
+pop_perc_white_nh_m                                         1.947e+00  7.050e-02  27.613  < 2e-16  ***
+eco_med_income_m                                            6.760e-06  9.567e-07   7.066 1.60e-12  ***
+eco_unemp_rate_m                                           -6.689e+00  8.732e-01  -7.660 1.85e-14  ***
+eco_gini_m                                                 -3.507e+00  3.249e-01 -10.792  < 2e-16  ***
+hc_perc_unins_m                                             7.556e+00  2.642e-01  28.603  < 2e-16  ***
+edu_perc_college_and_more_m                                -1.589e+00  1.210e-01 -13.126  < 2e-16  ***
+I(density - density_m)                                     -1.053e-03  3.626e-04  -2.904  0.00368  ** 
+I(pop_perc_white_nh - pop_perc_white_nh_m)                  2.317e-01  7.105e-01   0.326  0.74435     
+I(eco_med_income - eco_med_income_m)                       -9.667e-06  3.804e-06  -2.541  0.01104  *  
+I(eco_unemp_rate - eco_unemp_rate_m)                        1.263e-01  8.576e-01   0.147  0.88294
+I(eco_gini - eco_gini_m)                                    4.079e-01  6.174e-01   0.661  0.50883
+I(hc_perc_unins - hc_perc_unins_m)                         -5.410e-01  3.354e-01  -1.613  0.10672
+I(edu_perc_college_and_more - edu_perc_college_and_more_m) -4.517e-02  3.427e-01  -0.132  0.89515
+                                                              
+  
+
+Phi coefficients (precision model with identity link):
+      Estimate Std. Error z value Pr(>|z|)    
+(phi)  25.9731     0.7642   33.98   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Type of estimator: ML (maximum likelihood)
+Log-likelihood:  2117 on 16 Df
+Pseudo R-squared: 0.5631
+Number of iterations: 22 (BFGS) + 3 (Fisher scoring) 

@@ -1,0 +1,32 @@
+mod_2 <- "perc_gop ~ (density + pop_perc_white_nh + 
+eco_med_income +  eco_unemp_rate + eco_gini + 
+hc_perc_unins + edu_perc_college_and_more)"
+
+Call:
+betareg(formula = as.formula(mod_2), data = ave, link = "logit")
+
+Standardized weighted residuals 2:
+    Min      1Q  Median      3Q     Max 
+-3.9713 -0.6373  0.0334  0.6546  3.0205 
+
+Coefficients (mean model with logit link):
+                            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                4.897e-02  3.213e-01   0.152    0.879    
+density                   -1.004e-04  1.871e-05  -5.367 8.01e-08 ***
+pop_perc_white_nh          1.969e+00  1.102e-01  17.876  < 2e-16 ***
+eco_med_income             6.379e-06  1.530e-06   4.170 3.05e-05 ***
+eco_unemp_rate            -6.079e+00  1.346e+00  -4.517 6.28e-06 ***
+eco_gini                  -3.417e+00  5.148e-01  -6.637 3.21e-11 ***
+hc_perc_unins              7.315e+00  4.138e-01  17.677  < 2e-16 ***
+edu_perc_college_and_more -1.579e+00  1.918e-01  -8.232  < 2e-16 ***
+
+Phi coefficients (precision model with identity link):
+      Estimate Std. Error z value Pr(>|z|)    
+(phi)   28.619      1.409   20.32   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Type of estimator: ML (maximum likelihood)
+Log-likelihood: 796.1 on 9 Df
+Pseudo R-squared: 0.5842
+Number of iterations: 16 (BFGS) + 2 (Fisher scoring) 

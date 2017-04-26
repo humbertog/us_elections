@@ -96,7 +96,7 @@ head(df_eco)
 ### Gini index
 dict_fgini <- data.frame(
   year=c(2015, 2011, 2007),
-  file=c("gini/ACS_15_1YR_B19083_with_ann.csv", "gini/ACS_11_1YR_B19083_with_ann.csv", "gini/ACS_07_1YR_B19083_with_ann.csv"),
+  file=c("dat_gini/ACS_15_1YR_B19083_with_ann.csv", "dat_gini/ACS_11_1YR_B19083_with_ann.csv", "dat_gini/ACS_07_1YR_B19083_with_ann.csv"),
   stringsAsFactors=FALSE
 )
 
@@ -259,8 +259,8 @@ votes$year[votes$variable == "total_2016"] <- 2015
 df_acs_votes <- merge(df_acs_votes, votes[,c("GEO.id2", "total_votes", "year")], all.x = TRUE)
 dim(df_acs_votes)
 
-
-
+df_acs_votes$eco_mean_income <- df_acs_votes$eco_mean_income / 1000
+df_acs_votes$eco_med_income <- df_acs_votes$eco_med_income / 1000
 
 #####
 df_acs_votes[is.na(df_acs_votes$perc_gop),]

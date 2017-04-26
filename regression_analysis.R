@@ -31,7 +31,7 @@ summary(betar_1_2016)
 
 # y_it  = b_0 + b_1 x_i. + b_2(X_it - x_i.)
 vars <- c("GEO.id2", "GEO.id", "GEO.display.label","year","density",
-          "pop_perc_white_nh", "eco_unemp_rate",
+          "pop_perc_white_nh", "eco_unemp_rate", "eco_mean_income",
           "eco_med_income", "eco_gini", "edu_perc_college_and_more", "hc_perc_unins", "perc_gop")
           
 df_acs_votes__ <- df_acs_votes[,vars]
@@ -82,6 +82,28 @@ I(edu_perc_college_and_more - edu_perc_college_and_more_m)"
 betar_2_d_3 <- betareg(as.formula(mod_2_d_3), data=df_acs_votes__, link="logit")
 summary(betar_2_d_3)
 plot(betar_2_d_3)
+
+### Some tests of sign change:
+
+mod_test <- "perc_gop ~ 1 + density_m + pop_perc_white_nh_m + eco_mean_income_m +
+eco_unemp_rate_m + eco_gini_m + hc_perc_unins_m + edu_perc_college_and_more_m"
+
+betar_test <- betareg(as.formula(mod_test), data=df_acs_votes__, link="logit")
+summary(betar_test)
+
+library(MASS)
+lm.ridge(as.formula(mod_test), data=df_acs_votes__, lambda = 0)
+
+
+ggplot(df_acs_votes__, aes(edu_perc_college_and_more_m, eco_mean_income_m)) + 
+  geom_point(aes(size=density), alpha=0.5, shape=1) +
+  geom_smooth(se=FALSE)
+
+ggplot(df_acs_votes__, aes(pop_perc_white_nh_m, edu_perc_college_and_more_m)) + 
+  geom_point(aes(size=density), alpha=0.5, shape=1) +
+  geom_smooth(se=FALSE)
+
+
 
 
 ggplot(df_acs_votes__, aes(eco_med_income_m, log(perc_gop / (1 - perc_gop)))) + 

@@ -266,4 +266,7 @@ df_acs_votes$eco_med_income <- df_acs_votes$eco_med_income / 1000
 df_acs_votes[is.na(df_acs_votes$perc_gop),]
 df_acs_votes$density <- df_acs_votes$pop_total / df_acs_votes$land_area
 
+
+# fix the results of 2008 elections for Laporte county (18091)
+df_acs_votes$perc_gop[df_acs_votes$GEO.id2 == 18091 & df_acs_votes$year ==2007] <- .381
 save(df_acs_votes, file="prepared_data_1yr.RData")

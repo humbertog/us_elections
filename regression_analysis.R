@@ -2,6 +2,7 @@ library(ggplot2)
 library(GGally)
 library(betareg)
 library(reshape2)
+library(car)
 
 #load("prepared_data.RData")
 load("prepared_data_1yr.RData")
@@ -39,6 +40,10 @@ df_acs_votes__ <- df_acs_votes[,vars]
 ave <- aggregate(df_acs_votes__[,-c(1:4)], by=list(df_acs_votes__$GEO.id2), FUN=mean, na.rm=TRUE)
 names(ave)[1] <- "GEO.id2"
 
+sd <- aggregate(df_acs_votes__[,-c(1:4)], by=list(df_acs_votes__$GEO.id2), FUN=sd, na.rm=TRUE)
+names(sd)[1] <- "GEO.id2"
+
+
 # just check
 mod_2 <- "perc_gop ~ (density + pop_perc_white_nh + 
 eco_med_income +  eco_unemp_rate + eco_gini + 
@@ -49,6 +54,7 @@ summary(betar_2)
 
 # now the model with the differences
 df_acs_votes__ <- merge(df_acs_votes__, ave, by=c("GEO.id2"), suffixes=c("","_m"))
+df_acs_votes__ <- merge(df_acs_votes__, sd, by=c("GEO.id2"), suffixes=c("","_sd"))
 
 mod_2_d <- "I(perc_gop- perc_gop_m) ~ -1 + I(density - density_m) + 
 I(pop_perc_white_nh - pop_perc_white_nh_m) + I(eco_med_income - eco_med_income_m) +
@@ -83,6 +89,24 @@ betar_2_d_3 <- betareg(as.formula(mod_2_d_3), data=df_acs_votes__, link="logit")
 summary(betar_2_d_3)
 plot(betar_2_d_3)
 
+vif(betar_2_d_3)
+anova(betar_2_d_3)
+#
+mod_2_d_4 <- "perc_gop ~ 1 + density_m + pop_perc_white_nh_m + eco_med_income_m +
+eco_unemp_rate_m + eco_gini_m + hc_perc_unins_m + edu_perc_college_and_more_m + 
+I((density - density_m)/density_sd) + 
+I((pop_perc_white_nh - pop_perc_white_nh_m)/pop_perc_white_nh_sd) + 
+I((eco_med_income - eco_med_income_m)/eco_med_income_sd) +
+I((eco_unemp_rate - eco_unemp_rate_m)/eco_unemp_rate_sd) + 
+I((eco_gini - eco_gini_m)/eco_gini_sd) +
+I((hc_perc_unins - hc_perc_unins_m)/hc_perc_unins_sd) + 
+I((edu_perc_college_and_more - edu_perc_college_and_more_m)/edu_perc_college_and_more_sd)"
+
+betar_2_d_4 <- betareg(as.formula(mod_2_d_4), data=df_acs_votes__, link="logit")
+summary(betar_2_d_4)
+plot(betar_2_d_4)
+
+
 ### Some tests of sign change:
 
 mod_test <- "perc_gop ~ 1 + density_m + pop_perc_white_nh_m + eco_mean_income_m +
@@ -90,6 +114,9 @@ eco_unemp_rate_m + eco_gini_m + hc_perc_unins_m + edu_perc_college_and_more_m"
 
 betar_test <- betareg(as.formula(mod_test), data=df_acs_votes__, link="logit")
 summary(betar_test)
+
+
+
 
 library(MASS)
 lm.ridge(as.formula(mod_test), data=df_acs_votes__, lambda = 0)
